@@ -13,7 +13,7 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
 
-# Задаємо адресу сервера (за потребою змініть)
+# Встановлюємо адресу сервера (за потребою змініть)
 HOST, PORT = "127.0.0.1", 9999
 
 def send_request(action, data, callback):
@@ -28,7 +28,6 @@ def send_request(action, data, callback):
             if data:
                 request.update(data)
             s.send(json.dumps(request).encode())
-            # Читаємо відповідь від сервера
             response_data = b""
             while True:
                 chunk = s.recv(4096)
@@ -40,7 +39,6 @@ def send_request(action, data, callback):
             response = {"status": "error", "error": str(e)}
         finally:
             s.close()
-        # Викликаємо callback у головному потоці Kivy
         Clock.schedule_once(lambda dt: callback(response))
     threading.Thread(target=worker, daemon=True).start()
 
@@ -53,12 +51,12 @@ class Rate(BoxLayout):
         self.current_rating = 0
 
         lbl_title = Label(text="Оцініть фото", font_size=32, halign="center", size_hint=(1, 0.1))
-        self.img = Image(source="")  # Спочатку порожній
+        self.img = Image(source="")
 
         self.add_widget(lbl_title)
         self.add_widget(self.img)
 
-        # Панель для оцінювання (зірки)
+        # Панель для оцінювання (відображення зірочок)
         stars_layout = BoxLayout(size_hint=(1, 0.1))
         self.star_buttons = []
         for i in range(5):
@@ -132,9 +130,11 @@ class Rate(BoxLayout):
             data_stream = io.BytesIO(image_bytes)
             core_image = CoreImage(data_stream, ext=ext)
             self.img.texture = core_image.texture
-            # Встановлюємо поточний рейтинг за даними відповіді
+
+            # Встановлення поточної оцінки від сервера
             current_rating = response.get("current_rating", 0)
             self.current_rating = current_rating
+            print(current_rating)
             for i, star in enumerate(self.star_buttons):
                 if i < current_rating:
                     star.background_normal = "star1.png"
