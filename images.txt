@@ -1,0 +1,14 @@
+0|images\baran.jpg
+1|images\bird.jpg
+2|images\cat.jpg
+3|images\deer.jpg
+4|images\dog.jpg
+5|images\horse.jpg
+6|images\laika.jpg
+7|images\lion.jpg
+8|images\monkey.jpg
+9|images\ostrich head.jpg
+10|images\retired lion.jpg
+11|images\smart cat.jpg
+12|images\something.jpg
+13|images\wolf.jpg
