@@ -25,15 +25,21 @@ def send_request(action, data, callback):
             request = {"action":action}
             if data:
                 request.update(data)
+            print('preloopa')
             s.sendall(json.dumps(request).encode())
+            print('zaaaloopa')
             response_data = b""
             while True:
+                print('prezaloopa')
                 chunk = s.recv(4096)
+                print('zaloopa')
                 if not chunk:
                     break
                 response_data += chunk
             response = json.loads(response_data.decode())
+            print(response)
         except Exception as e:
+            print(e)
             response = {"status":"error", "error":f"{e}"}
         finally:
             s.close()
@@ -60,6 +66,7 @@ class Rate(BoxLayout):
             btnBox.add_widget(btn)
             btn.bind(on_press=self.rating)
         self.add_widget(btnBox)
+        self.request_image("get_next")
     
     def rating(self, btn):
         index = int(btn.text) - 1

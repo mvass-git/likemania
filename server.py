@@ -24,7 +24,7 @@ def scan_image(path):
         full_path = os.path.join(path, p)
         if (p.lower().endswith('.png') or p.lower().endswith('.jpg')) and os.path.isfile(full_path):
             result.append(full_path)
-    return full_path
+    return result
 
 if not images.data:
     image_list = scan_image(IMAGES_FOLDER)
@@ -59,7 +59,7 @@ def get_image_response(user, record, action):
         if r["ip"] == user and r['image'] == record['id']:
             current_rating = int(r["rating"])
     
-    return {
+    msg ={
         "status":"ok",
         "action":action,
         "image":b64_data,
@@ -67,6 +67,9 @@ def get_image_response(user, record, action):
         "path":image_path,
         "current_rating":current_rating
     }
+
+    print(msg)
+    return msg
 
 commands = {}
 def command(action):
@@ -114,6 +117,7 @@ def handle_client(client_socket, address):
             if not data:
                 break
             request = json.loads(data)
+            print(request)
             action = request.get("action")
             #handling commands: rate, get_next
             if action in commands:
@@ -134,7 +138,7 @@ def start_server():
     while True:
         client_socket, addr = server.accept()
         print(f"Connected client: {addr}")
-        #thread
+        threading.Thread(target=handle_client,args=(client_socket, addr), daemon=True)
 
 if __name__ == '__main__':
     start_server()
