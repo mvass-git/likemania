@@ -110,6 +110,7 @@ def cmd_rate(user, request):
             break
     if not rating_found:
         ratings.add((user, image_id, rating_value))
+    ratings.save_to_file(RATINGS_DB)
     return {"status":"ok", "action":"rate"}
 
 def handle_client(client_socket, address):
