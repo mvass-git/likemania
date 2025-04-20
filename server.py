@@ -10,13 +10,15 @@ IMAGES_FOLDER = 'images'
 IMAGES_DB = 'images.txt'
 RATINGS_DB = 'ratings.txt'
 
-images = MiniDB(['id','path'], IMAGES_DB)
-ratings = MiniDB(['ip','image','rating'], RATINGS_DB)
-
 CLEAN_ON_START = False
 if CLEAN_ON_START:
     open(IMAGES_DB, 'w').close()
     open(RATINGS_DB, 'w').close()
+
+images = MiniDB(['id','path'], IMAGES_DB)
+ratings = MiniDB(['ip','image','rating'], RATINGS_DB)
+
+
 
 def scan_image(path):
     result = []
@@ -44,6 +46,7 @@ def update_user_position(user, shift, default_value):
     total = len(images.data)
     current = user_positions.get(user, default_value)
     new_index = (current + shift)% total
+    user_positions[user]=new_index
     return new_index
 
 def get_image_response(user, record, action):
@@ -112,19 +115,17 @@ def cmd_rate(user, request):
 def handle_client(client_socket, address):
     user_id = address[0]
     try:
-        while True:
-            data = client_socket.recv(1024).decode()
-            if not data:
-                break
-            request = json.loads(data)
-            print(request)
-            action = request.get("action")
-            #handling commands: rate, get_next
-            if action in commands:
-                response = commands[action](user_id, request)
-            else:
-                response = None
-            client_socket.send(json.dumps(response).encode())
+        data = client_socket.recv(1024).decode()
+        if not data:
+            return
+        request = json.loads(data)
+        action = request.get("action")
+        #handling commands
+        if action in commands:
+            response = commands[action](user_id, request)
+        else:
+            response = None
+        client_socket.send(json.dumps(response).encode())
     except Exception as e:
         print(f"Error: {e}")
     finally:
@@ -138,7 +139,7 @@ def start_server():
     while True:
         client_socket, addr = server.accept()
         print(f"Connected client: {addr}")
-        threading.Thread(target=handle_client,args=(client_socket, addr), daemon=True)
+        threading.Thread(target=handle_client,args=(client_socket, addr), daemon=True).start()
 
 if __name__ == '__main__':
     start_server()

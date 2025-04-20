@@ -25,14 +25,10 @@ def send_request(action, data, callback):
             request = {"action":action}
             if data:
                 request.update(data)
-            print('preloopa')
             s.sendall(json.dumps(request).encode())
-            print('zaaaloopa')
             response_data = b""
             while True:
-                print('prezaloopa')
                 chunk = s.recv(4096)
-                print('zaloopa')
                 if not chunk:
                     break
                 response_data += chunk
@@ -52,6 +48,7 @@ class Rate(BoxLayout):
         super().__init__()
         self.orientation = 'vertical'
         btnBox=BoxLayout()
+        ctrlBox = BoxLayout(orientation='horizontal', size_hint=[1, 0.15])
         lbl_title = Label(text="Оцініть фото", font_size=32, halign="center", size_hint=[1,0.1])
 
         self.buttons = []
@@ -59,6 +56,8 @@ class Rate(BoxLayout):
 
         self.add_widget(lbl_title)
         self.add_widget(self.img)
+        self.current_image_id = 0
+        self.current_rating = 0
 
         for i in range(5):
             btn = Button(text=str(i+1), background_normal="star0.png", color=[0,0,0,0], background_down="star0.png")
@@ -66,6 +65,14 @@ class Rate(BoxLayout):
             btnBox.add_widget(btn)
             btn.bind(on_press=self.rating)
         self.add_widget(btnBox)
+
+        btn_prev = Button(text='<--', on_press = self.on_prev)
+        btn_rate = Button(text='ok', on_press = self.on_rate)
+        btn_next = Button(text='-->', on_press = self.on_next)
+        ctrlBox.add_widget(btn_prev)
+        ctrlBox.add_widget(btn_rate)
+        ctrlBox.add_widget(btn_next)
+        self.add_widget(ctrlBox)
         self.request_image("get_next")
     
     def rating(self, btn):
@@ -77,9 +84,10 @@ class Rate(BoxLayout):
             else:
                 self.buttons[i].background_normal = "star0.png"
                 self.buttons[i].background_down = "star0.png"
+        self.current_rating = index+1
     
     def on_rate(self, btn):
-        if self.current_image_id in None or self.current_rating == 0:
+        if self.current_image_id is None or self.current_rating == 0:
             print("no image or no rating")
             return
         data = {"image":self.current_image_id, "rating":self.current_rating}
